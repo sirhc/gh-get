@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -euo pipefail
+
+repo=
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -h|--help)
+            printf 'Usage: gh get <user>/<repo>\n'
+            printf '       gh get https://github.com/<user>/<repo>\n'
+            printf '       gh get https://github.com/<user>/<repo>.git\n'
+            exit 0
+            ;;
+        *)
+            repo="$1"
+            ;;
+    esac
+
+    shift
+done
+
+if [[ $repo =~ ^https://github.com/ ]]; then
+    repo="${repo#https://github.com/}"
+    repo="${repo%.git}"
+    exec gh repo clone "$repo" "$HOME/src/github.com/${repo}"
+fi
+
+# Assume $repo is `<user|org>/<repo>`.
+exec gh repo clone "$repo" "$HOME/src/github.com/$repo"
