@@ -24,6 +24,11 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
+if [[ $repo =~ ^https://github.com/ ]]; then
+    repo="${repo#https://github.com/}"
+    repo="${repo%.git}"
+fi
+
 dest="$HOME/src/github.com/${repo}"
 
 if [[ -e "$dest" ]]; then
@@ -33,11 +38,4 @@ if [[ -e "$dest" ]]; then
     exit 0
 fi
 
-if [[ $repo =~ ^https://github.com/ ]]; then
-    repo="${repo#https://github.com/}"
-    repo="${repo%.git}"
-    exec gh repo clone "$repo" "$dest"
-fi
-
-# Assume $repo is `<user|org>/<repo>`.
 exec gh repo clone "$repo" "$dest"
