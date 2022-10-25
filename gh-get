@@ -3,15 +3,19 @@
 set -euo pipefail
 
 repo=
+register=
 verbose=
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -h|--help)
-            printf 'Usage: gh get <user>/<repo>\n'
-            printf '       gh get https://github.com/<user>/<repo>\n'
-            printf '       gh get https://github.com/<user>/<repo>.git\n'
+            printf 'Usage: gh get [-r] [-v] <user>/<repo>\n'
+            printf '       gh get [-r] [-v] https://github.com/<user>/<repo>\n'
+            printf '       gh get [-r] [-v] https://github.com/<user>/<repo>.git\n'
             exit 0
+            ;;
+        -r|--register)
+            register=1
             ;;
         -v|--verbose)
             verbose=1
@@ -30,6 +34,7 @@ if [[ $repo =~ ^https://github.com/ ]]; then
 fi
 
 dest="$HOME/src/github.com/${repo}"
+mrconfig="$( dirname "$dest" )/.mrconfig"
 
 if [[ -e "$dest" ]]; then
     if [[ -n "$verbose" ]]; then
@@ -38,4 +43,11 @@ if [[ -e "$dest" ]]; then
     exit 0
 fi
 
-exec gh repo clone "$repo" "$dest"
+gh repo clone "$repo" "$dest"
+
+if [[ -n "$register" ]]; then
+    if [[ ! -e "$mrconfig" ]]; then
+        touch "$mrconfig"
+    fi
+    mr -c "$mrconfig" register "$dest"
+fi
