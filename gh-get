@@ -3,6 +3,7 @@
 set -euo pipefail
 
 repo=
+verbose=
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -12,6 +13,9 @@ while [[ $# -gt 0 ]]; do
             printf '       gh get https://github.com/<user>/<repo>.git\n'
             exit 0
             ;;
+        -v|--verbose)
+            verbose=1
+            ;;
         *)
             repo="$1"
             ;;
@@ -20,11 +24,20 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
+dest="$HOME/src/github.com/${repo}"
+
+if [[ -e "$dest" ]]; then
+    if [[ -n "$verbose" ]]; then
+        printf '%s: %s: destination exists\n' "$0" "$dest"
+    fi
+    exit 0
+fi
+
 if [[ $repo =~ ^https://github.com/ ]]; then
     repo="${repo#https://github.com/}"
     repo="${repo%.git}"
-    exec gh repo clone "$repo" "$HOME/src/github.com/${repo}"
+    exec gh repo clone "$repo" "$dest"
 fi
 
 # Assume $repo is `<user|org>/<repo>`.
-exec gh repo clone "$repo" "$HOME/src/github.com/$repo"
+exec gh repo clone "$repo" "$dest"
